@@ -1,0 +1,31 @@
+# CMake-generated files
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Compiled object files
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled executables
+*.exe
+
+# IDE-specific files
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+*.VC.db
+*.opensdf
+*.sdf
+
+*.npz
+mandelbrot

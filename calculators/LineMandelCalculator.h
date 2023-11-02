@@ -15,5 +15,7 @@ public:
     int *calculateMandelbrot();
 
 private:
-    // @TODO add all internal parameters
+    int *data;
+    float *line_real, *line_real_start, *line_imag;
+    int *line;
 };

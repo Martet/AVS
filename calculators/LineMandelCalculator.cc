@@ -35,46 +35,49 @@ LineMandelCalculator::~LineMandelCalculator() {
 	free(line_real);
 	free(line_imag);
 	free(line_real_start);
+	free(line);
 	data = NULL;
 	line_real = NULL;
 	line_imag = NULL;
 	line_real_start = NULL;
+	line = NULL;
 }
 
 
 int * LineMandelCalculator::calculateMandelbrot () {
-	int *pdata = data;
+	int *pdata = data, *pline = line;
+	float *pline_real = line_real, *pline_imag = line_imag, *pline_real_start = line_real_start;
 	for (int i = 0; i < height / 2; i++)
 	{
 		float zImag = y_start + i * dy; // current imaginary value
-		std::memcpy(line_real, line_real_start, width * sizeof(float));
-		std::memset(line_imag, 0, width * sizeof(float));
+		std::memcpy(pline_real, pline_real_start, width * sizeof(float));
 		for (int j = 0; j < width; j++)
 		{
-			line[j] = limit;
+			pline[j] = limit;
+			pline_imag[j] = zImag;
 		}
 		for (int n = 0; n < limit; n++)
 		{
 			int flag = width;
-			#pragma omp simd aligned(line_real, line_imag, line_real_start: 64) reduction(-:flag)
+			#pragma omp simd aligned(pline, pline_real, pline_imag, pline_real_start:64) reduction(-:flag)
 			for (int j = 0; j < width; ++j)
 			{
-				float r2 = line_real[j] * line_real[j];
-				float i2 = line_imag[j] * line_imag[j];
+				float r2 = pline_real[j] * pline_real[j];
+				float i2 = pline_imag[j] * pline_imag[j];
 
-				if (r2 + i2 > 4.0f && line[j] == limit) {
+				if (r2 + i2 > 4.0f && pline[j] == limit) {
 					flag--;
-					line[j] = n;
+					pline[j] = n;
 				}
-				if (line[j] == limit) {
-					line_imag[j] = 2.0f * line_real[j] * line_imag[j] + zImag;
-					line_real[j] = r2 - i2 + line_real_start[j];
+				if (pline[j] == limit) {
+					pline_imag[j] = 2.0f * pline_real[j] * pline_imag[j] + zImag;
+					pline_real[j] = r2 - i2 + pline_real_start[j];
 				}
 			}
 			if (flag == 0)
 				break;
 		}
-		std::memcpy(pdata, line, width * sizeof(int));
+		std::memcpy(pdata, pline, width * sizeof(int));
 		pdata += width;
 	}
 	for (int i = 0; i < height / 2; i++) {

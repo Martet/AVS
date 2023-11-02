@@ -69,10 +69,9 @@ int * LineMandelCalculator::calculateMandelbrot () {
 					flag--;
 					pline[j] = n;
 				}
-				if (pline[j] == limit) {
-					pline_imag[j] = 2.0f * pline_real[j] * pline_imag[j] + zImag;
-					pline_real[j] = r2 - i2 + pline_real_start[j];
-				}
+
+				pline_imag[j] = 2.0f * pline_real[j] * pline_imag[j] + zImag;
+				pline_real[j] = r2 - i2 + pline_real_start[j];
 			}
 			if (flag == 0)
 				break;

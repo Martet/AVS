@@ -3,20 +3,22 @@
 
 1. Byla "Line" vektorizace časově efektivní? Proč?
 ==============================================================================
-
+Nebyla příliš časově efektivní, z důvodu nutnosti dopočítat větší množství iterací na každém řádku.
 
 2. Jaká byla dosažena výkonnost v Intel Advisoru pro jednotlivé implementace 
 (v GFLOPS)?
 ==============================================================================
-
+Ref - 0.75
+Line - 38.72
+Batch - 52.69
 
 3. Jaká část kódu byla vektorizována v "Line" implementaci? Vyčteme tuto 
 informaci i u batch kalkulátoru?
 ==============================================================================
-
+Smyčka pro průchod řádkem, u batch kalkulátoru smyčka pro průchod dávky o velikosti 64 prvků na řádku.
 
 4. Co vyčteme z Roofline modelu pro obě vektorizované implementace?
 ==============================================================================
-
+Výkon je omezen převážně propustností paměti, batch však využívá paměť efektivněji.
 
 

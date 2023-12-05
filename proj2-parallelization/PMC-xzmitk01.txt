@@ -7,12 +7,15 @@ Login: xzmitk01
 
 1) Kterou ze smyček (viz zadání) je vhodnější paralelizovat a co způsobuje 
    neefektivitu paralelizaci té druhé?
+Vhodnější je paralelizovat smyčku ve funkci marchCubes. Druhá smyčka je obsažena v první, tedy obsahuje mnohem kratší a jednodušší výpočet. Paralelizace takové smyčky se z hlediska zavedení režie pro paralelizmus nevyplatí.
 
 2) Jaké plánování (rozdělení práce mezi vlákna) jste zvolili a proč? 
    Jaký vliv má velikost "chunk" při dynamickém plánování (8, 16, 32, 64)?
+Zvolil jsem statické plánování, to se vyplatí, protože každá iterace má podobné očekávané množství práce, práci tedy lze s minimální režií rovnoměrně rozdělit mezi vlákna.
+Určuje počet úloh, které jsou naráz přiřazeny jednomu vláknu. V tomto případě způsobí větší velikost zpomalení, protože počet úloh není tak velký a dojde k přeplnění vláken.
 
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
-
+Použitím kritické sekce - do vektoru přistupuje maximálně jedno vlákno naráz.
 
 Úloha 2: Paralelní průchod stromem
 ===============================================================================

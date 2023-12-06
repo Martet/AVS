@@ -31,27 +31,39 @@ unsigned TreeMeshBuilder::evaluateCube(const Vec3_t<float> &cubeOffset, const fl
     if(evaluateFieldAt(center, field) > mIsoLevel + a * sqrt(3) / 2.0)
         return 0;
 
+    unsigned totalTriangles = 0;
     if(a > 1)
     {
-        unsigned totalTriangles = 0;
         for(int i = 0; i < 8; i++)
         {
-            const Vec3_t<float> childOffset(
-                cubeOffset.x + (i & 1) * newA,
-                cubeOffset.y + ((i >> 1) & 1) * newA,
-                cubeOffset.z + ((i >> 2) & 1) * newA
-            );
-            totalTriangles += evaluateCube(childOffset, newA, field);
+            #pragma omp task shared(totalTriangles)
+            {
+                const Vec3_t<float> childOffset(
+                    cubeOffset.x + (i & 1) * newA,
+                    cubeOffset.y + ((i >> 1) & 1) * newA,
+                    cubeOffset.z + ((i >> 2) & 1) * newA
+                );
+                unsigned childTriangles = evaluateCube(childOffset, newA, field);
+                #pragma omp atomic
+                totalTriangles += childTriangles;
+            }
         }
-        return totalTriangles;
     } else {
-        return buildCube(cubeOffset, field);
+        unsigned childTriangles = buildCube(cubeOffset, field);
+        #pragma omp atomic
+        totalTriangles += childTriangles;
     }
+    #pragma omp taskwait
+    return totalTriangles;
 }
 
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
-    return evaluateCube(Vec3_t<float>(), mGridSize, field);
+    unsigned totalTriangles;
+    #pragma omp parallel
+    #pragma omp single
+    totalTriangles = evaluateCube(Vec3_t<float>(), mGridSize, field);
+    return totalTriangles;
 }
 
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
@@ -89,5 +101,6 @@ void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
     // Store generated triangle into vector (array) of generated triangles.
     // The pointer to data in this array is return by "getTrianglesArray(...)" call
     // after "marchCubes(...)" call ends.
+    #pragma omp critical(emitTriangle)
     mTriangles.push_back(triangle);
 }

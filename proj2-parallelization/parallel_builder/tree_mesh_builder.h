@@ -23,7 +23,7 @@ protected:
     float evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field);
     void emitTriangle(const Triangle_t &triangle);
     const Triangle_t *getTrianglesArray() const { return mTriangles.data(); }
-    unsigned evaluateCube(const Vec3_t<float> &cubeOffset, const float a, const ParametricScalarField &field);
+    unsigned evaluateCube(const Vec3_t<float> &cubeOffset, const unsigned a, const ParametricScalarField &field);
 
     std::vector<Triangle_t> mTriangles; ///< Temporary array of triangles
 };

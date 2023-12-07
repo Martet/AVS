@@ -20,48 +20,46 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 
 }
 
-unsigned TreeMeshBuilder::evaluateCube(const Vec3_t<float> &cubeOffset, const float a, const ParametricScalarField &field)
+unsigned TreeMeshBuilder::evaluateCube(const Vec3_t<float> &cubeOffset, const unsigned a, const ParametricScalarField &field)
 {
-    const float newA = 0.5 * a;
+    const unsigned newA = a / 2;
     const Vec3_t<float> center(
         (cubeOffset.x + newA) * mGridResolution,
         (cubeOffset.y + newA) * mGridResolution,
         (cubeOffset.z + newA) * mGridResolution
     );
-    if(evaluateFieldAt(center, field) > mIsoLevel + a * sqrt(3) / 2.0)
+    if(evaluateFieldAt(center, field) > mIsoLevel + a * mGridResolution * sqrt(3) / 2.0)
         return 0;
 
-    unsigned totalTriangles = 0;
     if(a > 1)
     {
-        for(int i = 0; i < 8; i++)
+        unsigned totalTriangles = 0;
+        for(unsigned i = 0; i < 8; i++)
         {
             #pragma omp task shared(totalTriangles)
             {
                 const Vec3_t<float> childOffset(
-                    cubeOffset.x + (i & 1) * newA,
-                    cubeOffset.y + ((i >> 1) & 1) * newA,
-                    cubeOffset.z + ((i >> 2) & 1) * newA
+                    cubeOffset.x + sc_vertexNormPos[i].x * newA,
+                    cubeOffset.y + sc_vertexNormPos[i].y * newA,
+                    cubeOffset.z + sc_vertexNormPos[i].z * newA
                 );
                 unsigned childTriangles = evaluateCube(childOffset, newA, field);
-                #pragma omp atomic
+                #pragma omp atomic update
                 totalTriangles += childTriangles;
             }
         }
+        #pragma omp taskwait
+        return totalTriangles;
     } else {
-        unsigned childTriangles = buildCube(cubeOffset, field);
-        #pragma omp atomic
-        totalTriangles += childTriangles;
+        return buildCube(cubeOffset, field);
     }
-    #pragma omp taskwait
-    return totalTriangles;
 }
 
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     unsigned totalTriangles;
     #pragma omp parallel
-    #pragma omp single
+    #pragma omp single nowait
     totalTriangles = evaluateCube(Vec3_t<float>(), mGridSize, field);
     return totalTriangles;
 }

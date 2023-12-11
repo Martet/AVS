@@ -21,24 +21,32 @@ Použitím kritické sekce - do vektoru přistupuje maximálně jedno vlákno na
 ===============================================================================
 
 1) Stručně popište použití OpenMP tasků ve vašem řešení.
+Tasky jsou využité při rekurzivním spouštění funkce evaluateCube pro jednotlivé podprostory.
 
 2) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový 
    task pro každou krychli na nejnižší úrovni?
+Cut-off je vždy při krychli se stranou o délce 1.
+Vytváření tasku pro každou krychli na nejnižší úrovni vhodné je, funkce buildCube, která tuto funkcionalitu zajišťuje není triviální a paralelizace je tedy výhodná.
 
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+Využitím kritické sekce, stejně, jako při paralelizaci původní implementace.
 
 Úloha 3: Grafy škálování všech řešení
 ===============================================================================
 
 1) Stručně zhodnoťte efektivitu vytvořených řešení (na základě grafů ŠKÁLOVÁNÍ).
+Celkově se jako efektivnější jeví tree implementace, což lze nejvýrazněji pozorovat při menším počtu vláken a menších vstupech.
 
 2) V jakém případě (v závislosti na počtu bodů ve vstupním souboru a velikosti 
    mřížky) bude vaše řešení 1. úlohy neefektivní? (pokud takový případ existuje)
+Při jemné mřížce a malém počtu vstupních bodů.
 
 3) Je (nebo není) stromový algoritmus efektivnější z pohledu slabého škálování 
    vzhledem ke vstupu?
+Není, nejhorší škálování má pro malé vstupy.
 
 4) Jaký je rozdíl mezi silným a slabým škálováním?
+Silné škálování určuje efektivitu vzhledem k celkové náročnosti úlohy, slabé vzhledem k náročnosti úlohy na vlákno.
 
 Úloha 4: Analýza využití jader pomocí VTune
 ================================================================================
@@ -46,15 +54,18 @@ Použitím kritické sekce - do vektoru přistupuje maximálně jedno vlákno na
 1) Jaké bylo průměrné využití jader pro všechny tři implementace s omezením na 
    18 vláken? Na kolik procent byly využity?
    
-   ref:
-   loop:
-   tree:
+   ref: 2.8
+   loop: 48.1
+   tree: 43.4
 
 2) Jaké bylo průměrné využití jader pro všechny tři implementace s využitím 
    všech jader? Na kolik procent se podařilo využít obě CPU?
    
-   ref:
-   loop:
-   tree:
+   ref: 2.8
+   loop: 88.6
+   tree: 76.1
 
 3) Jaké jsou závěry z těchto měření?
+Naměřené hodnoty odpovídají očekávání, referenční řešení paralelizované není, tudíž je využití jader minimální a pro obě omezení stejné.
+Využití jader bez omezení je skoro dvakrát vyšší než s omezením na 16 vláken pro obě paralelizované, což je způsobeno využitím pouze poloviny z celkových možných 36 vláken.
+Využití jader bylo pro tree implementaci mírně nižší než pro loop implementaci - za to může nutnost čekání na dokončení tasků před vrácením z rekurzivní funkce. Při loop implementaci běží všechny vlákna nepřerušovaně.
